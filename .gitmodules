@@ -1,0 +1,3 @@
+[submodule "satsolverjs"]
+	path = satsolverjs
+	url = https://github.com/pochangl/satsolverjs
