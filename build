@@ -5,4 +5,4 @@ git pull
 npm install
 npm run build
 cd ..
-rsync -av ./$1js/dist/ ./$1
+rsync -av --delete ./$1js/dist/ ./$1

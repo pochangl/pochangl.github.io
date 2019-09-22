@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "precache-manifest.7dacd4fe5ff09ea9de4e45d41ba19cff.js"
+  "precache-manifest.cb17ebbf44f23fbb2c0795b83fd916f1.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "satsolverjs"});
