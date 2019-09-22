@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+cd $1js
+git pull
+npm install
+npm run build
+cd ..
+rsync -av ./$1js/dist/ ./$1
