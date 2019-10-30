@@ -1,3 +1,6 @@
 [submodule "satsolverjs"]
 	path = satsolverjs
 	url = https://github.com/pochangl/satsolverjs
+[submodule "liffjs"]
+	path = liffjs
+	url = https://github.com/pochangl/liff
