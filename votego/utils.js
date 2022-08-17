@@ -36,8 +36,12 @@ function createBoard(area, data, options) {
   return game;
 }
 
+function rand() {
+  return Math.random().toString(36).slice(2)
+}
+
 function getClient(host, port, options) {
-  let client = new Paho.MQTT.Client(host, Number(port), 'cid')
+  let client = new Paho.MQTT.Client(host, Number(port), rand())
   client.onConnectionLost = function () {
     alert('connection lost');
   };
