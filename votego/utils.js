@@ -41,7 +41,8 @@ function rand() {
 }
 
 function getClient(host, port, options) {
-  let client = new Paho.MQTT.Client(host, Number(port), rand())
+  const cid = window.localStorage.cid = window.localStorage.cid || (rand() + rand())
+  let client = new Paho.MQTT.Client(host, Number(port), cid)
   client.onConnectionLost = function () {
     alert('connection lost');
   };
