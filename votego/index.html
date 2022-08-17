@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="game.css"></link>
+    <link rel="stylesheet" href="tenuki/tenuki.min.css"></link>
+    <script type="text/javascript" src="tenuki/tenuki.js"></script>
+    <script type="text/javascript" src="paho-mqtt-min.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
+  </head>
+  <body>
+    <div style="position: relative">
+      <div id="board"></div>
+      <div id="suggest"></div>
+      <div id="playable"></div>
+      <p>注意事項</p>
+      <p> 1. 只有最早下的 10 步棋會被列入考慮</p>
+      <p> 2. AI 計算時間為第一步棋始的 20秒</p>
+      <p> 3. 野狐帳號 votego 有在下棋這個頁面才有作用 </p>
+      <p> 4. 頁面會崩潰, 有時候會需要重開 </p>
+      <p> 5. 頁面請開足夠大, 不要壓縮到盤面, 會定位錯誤 </p>
+    </div>
+    <script>
+      const board = document.querySelector('#board');
+      const suggest = document.querySelector('#suggest');
+      const playable = document.querySelector('#playable');
+
+      // connection
+      const api_host = 'https://votego.pochanglee.com';
+      const api = createAPI(api_host)
+      const mqtt_host = 'mqtt.pochanglee.com';
+      const port = 443;
+      const topics = ['/votego/1', '/suggest/1']
+
+      let game
+      let suggestGame
+      let suggests = [];
+      let data
+      let canPlay = true;
+
+      function run() {
+        fetch(api_host + '/api/board/1').then(function (response) {
+
+          response.json().then(function (data) {
+            game = createBoard(board, data);
+            suggestGame = setup_suggest(data)
+            start()
+          })
+        });
+
+      }
+      run()
+
+
+      function start() {
+        let client = getClient(mqtt_host, port)
+
+        client.onMessageArrived = function (payload) {
+          console.log(payload.topic)
+          if (payload.topic == '/votego/1') {
+            data = JSON.parse(payload.payloadString);
+            board.textContent = '';
+            playable.textContent = '';
+            game = createBoard(board, data);
+            suggest.className = game.currentPlayer();
+            canPlay = true;
+            suggests = [];
+  /*
+            // create playable board
+            createBoard(playable, data, {
+              _hooks: {
+                hoverValue: function (y, x) {
+                  if (canPlay) {
+                    return game.currentPlayer();
+                  }
+                },
+                handleClick: function (y, x) {
+                  if (canPlay) {
+                    canPlay = false;
+                    api({
+                      method: 'post',
+                      path: '/api/move/1',
+                      data: {
+                        step: data.step,
+                        y: y,
+                        x: x,
+                      },
+                    });
+                  }
+                },
+              }
+            });
+            */
+          }
+          if (payload.topic == '/suggest/1') {
+            suggests.push(JSON.parse(payload.payloadString));
+          }
+          if (data){
+            setup_suggest(data)
+          }
+        }
+
+      }
+      function setup_suggest(data) {
+          let suggestData = JSON.parse(JSON.stringify(data));
+          suggestData.moves = []
+          suggestData.rule.handicaps = suggests.slice()
+
+          suggest.textContent = '';
+          suggestGame = createBoard(suggest, suggestData, {
+            _hooks: {
+              handleClick: function (y, x) {
+                if (canPlay) {
+                  console.log(data);
+                  console.log('play', y, x);
+                  canPlay = false;
+                  api({
+                    method: 'post',
+                    path: '/api/suggest/1',
+                    data: {
+                      step: data.step,
+                      y: y,
+                      x: x,
+                    }
+                  });
+                }
+                canPlay = false;
+              },
+              hoverValue: function (y, x) {
+                if (canPlay) {
+                  return game.currentPlayer();
+                }
+              },
+            },
+          });
+      }
+    </script>
+  </body>
+</html>

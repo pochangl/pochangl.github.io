@@ -1,0 +1,48 @@
+#suggest .coordinates,
+#suggest .lines,
+#suggest .marker,
+#suggest .ko-marker,
+#suggest .territory-marker,
+#suggest .hoshi,
+#suggest .stone-shadow {
+    display: none;
+}
+
+#playable .coordinates,
+#playable .lines,
+#playable .marker,
+#playable .ko-marker,
+#playable .territory-marker,
+#playable .hoshi,
+#playable .stone-shadow {
+    display: none;
+}
+
+#suggest .tenuki-inner-container,
+#playable .tenuki-inner-container {
+    background-color: transparent !important;
+}
+
+#suggest,
+#playable {
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+#suggest .occupied:not(.hovered) .stone {
+    fill: green !important;
+    stroke: green !important;
+    opacity: 0.3;
+}
+
+#suggest.white .hovered .stone {
+    fill: white !important;
+    stroke: white !important;
+}
+
+#suggest.black .hovered .stone {
+    fill: black !important;
+    stroke: black !important;
+    opacity: 0.5
+}
