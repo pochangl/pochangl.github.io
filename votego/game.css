@@ -46,3 +46,7 @@
     stroke: black !important;
     opacity: 0.5
 }
+
+body {
+    min-width: 700px;
+}
