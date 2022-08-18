@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="game.css"></link>
+    <link rel="stylesheet" href="tenuki/tenuki.min.css"></link>
+    <script type="text/javascript" src="tenuki/tenuki.js"></script>
+    <script type="text/javascript" src="paho-mqtt-min.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
+  </head>
+  <body>
+    <div style="position: relative">
+      <div id="board"></div>
+      <div id="suggest"></div>
+      <div id="playable"></div>
+      <p>注意事項</p>
+      <p> 1. 只有最早下的 2～10 步棋(看設定)會被列入考慮, 選勝率最高的 </p>
+      <p> 2  較晚下的有可能計算不充份, 或是根本沒被算到</p>
+      <p> 3. AI 計算時間為第一個人落子開始的 20秒， 時間到就落子 </p>
+      <p> 4. 狗的計算力不高, 選不到最佳解正常， 它只是隻狗 </p>
+      <p> 5. 野狐帳號 votego 有在下棋這個頁面才有作用, 沒有作用大概是在做特殊研究 </p>
+      <p> 6. 頁面會崩潰, 有時候會需要重開頁面 </p>
+      <p> 7. 頁面請開足夠大, 不要壓縮到盤面, 落字定位會錯誤 </p>
+      <p> 8. 以上所述如果不符合實際情況, 或有不預期的 bug 很正常. 你的人生還不是一樣</p>
+    </div>
+    <script>
+      const board = document.querySelector('#board');
+      const suggest = document.querySelector('#suggest');
+      const playable = document.querySelector('#playable');
+
+      // connection
+      const api_host = 'https://votego.pochanglee.com';
+      const api = createAPI(api_host)
+      const mqtt_host = 'mqtt.pochanglee.com';
+      const port = 443;
+      const topics = ['/votego/1', '/suggest/1']
+
+      let game
+      let suggestGame
+      let suggests = [];
+      let data
+      let canPlay = true;
+
+      function run() {
+        fetch(api_host + '/api/board/1').then(function (response) {
+
+          response.json().then(function (data) {
+            game = createBoard(board, data);
+            suggestGame = setup_suggest(data)
+            start()
+          })
+        });
+
+      }
+      run()
+
+
+      function start() {
+        let client = getClient(mqtt_host, port)
+
+        client.onMessageArrived = function (payload) {
+          console.log(payload.topic)
+          if (payload.topic == '/votego/1') {
+            data = JSON.parse(payload.payloadString);
+            board.textContent = '';
+            playable.textContent = '';
+            game = createBoard(board, data);
+            suggest.className = game.currentPlayer();
+            canPlay = true;
+            suggests = [];
+          }
+          if (payload.topic == '/suggest/1') {
+            suggests.push(JSON.parse(payload.payloadString));
+          }
+          if (data){
+            setup_suggest(data)
+          }
+        }
+
+      }
+      function setup_suggest(data) {
+          let suggestData = JSON.parse(JSON.stringify(data));
+          suggestData.moves = []
+          suggestData.rule.handicaps = suggests.slice()
+
+          suggest.textContent = '';
+          suggestGame = createBoard(suggest, suggestData, {
+            _hooks: {
+              handleClick: function (y, x) {
+                if (canPlay) {
+                  console.log(data);
+                  console.log('play', y, x);
+                  canPlay = true;
+                  api({
+                    method: 'post',
+                    path: '/api/suggest/1',
+                    data: {
+                      step: data.step,
+                      y: y,
+                      x: x,
+                    }
+                  });
+                }
+                canPlay = true;
+              },
+              hoverValue: function (y, x) {
+                if (canPlay) {
+                  return game.currentPlayer();
+                }
+              },
+            },
+          });
+      }
+    </script>
+  </body>
+</html>
