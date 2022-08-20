@@ -43,9 +43,10 @@
       function run() {
         fetch(api_host + '/api/board/1').then(function (response) {
 
-          response.json().then(function (data) {
-            game = createBoard(board, data);
-            suggestGame = setup_suggest(data)
+          response.json().then(function (d) {
+            game = createBoard(board, d);
+            suggestGame = setup_suggest(d);
+            data = d
             start()
           })
         });
