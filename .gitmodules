@@ -4,3 +4,6 @@
 [submodule "liffjs"]
 	path = liffjs
 	url = https://github.com/pochangl/liff
+[submodule "progress-knight"]
+	path = progress-knight
+	url = https://github.com/pochangl/progress-knight
