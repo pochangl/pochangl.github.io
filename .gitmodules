@@ -7,3 +7,4 @@
 [submodule "progress-knight"]
 	path = progress-knight
 	url = https://github.com/pochangl/progress-knight
+	branch = master
